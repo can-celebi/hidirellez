@@ -105,13 +105,13 @@ function jsonOut_(obj) {
 // pick "cleanup" in the function dropdown next to Run, then click Run.
 // Wipes early test rows (setup-test, node-roundtrip-*, ffffff).
 function cleanup() {
-  const TEST_LABELS = new Set(["setup-test", "ffffff"]);
+  const TEST_LABELS = new Set(["setup-test", "ffffff", "kandil"]);
   const sh = getOrCreateSheet_();
   const values = sh.getDataRange().getValues();
   let n = 0;
   for (let i = values.length - 1; i >= 1; i--) { // skip header, walk bottom-up
     const label = String(values[i][1] || "");
-    if (TEST_LABELS.has(label) || label.startsWith("node-roundtrip-")) {
+    if (TEST_LABELS.has(label) || label.startsWith("node-roundtrip-") || label.startsWith("test-")) {
       sh.deleteRow(i + 1);
       n++;
     }

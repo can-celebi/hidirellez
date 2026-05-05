@@ -43,7 +43,8 @@
   <p class="overline">May 5 · 6 — the night Hızır and İlyas meet</p>
   <h1>Hıdırellez</h1>
   <p class="subtitle">
-    A digital rose tree, for wishes you can plant from anywhere.
+    An organic digital tree, filled with light —
+    drinking from the moon, and from happiness.
     <button type="button" class="info-btn" data-info-target="info-hero" aria-label="What is this?">
       <svg class="info-icon-svg"><use href="#info-icon-symbol"/></svg>
     </button>
@@ -181,24 +182,48 @@
   <div class="underground-bg" aria-hidden="true">
     <div class="soil-grid"></div>
     <div class="soil-particles"></div>
+    <div class="soil-cracks"></div>
     <div class="soil-fireflies"></div>
-  </div>
-
-  <div class="underground-header">
-    <h2>The garden
-      <button type="button" class="info-btn info-btn-h2" data-info-target="info-garden" aria-label="How does this work?">
-        <svg class="info-icon-svg"><use href="#info-icon-symbol"/></svg>
-      </button>
-    </h2>
-    <div class="info-popover" id="info-garden" role="tooltip" hidden>
-      <p>Each glow is a buried wish. Tap one and try a password — if it's yours, it opens. A wish that came true wears a halo of gold.</p>
-    </div>
-    <p class="count" id="garden-count"></p>
-    <button type="button" id="open-plant-secondary" class="btn primary plant-secondary">✦ Plant a wish</button>
   </div>
 
   <div id="garden-list" class="garden-list" aria-live="polite">
     <p class="loading">listening to the soil…</p>
+  </div>
+
+  <!-- Breeze layer: fireflies emitted by pulsing wishes drift across this -->
+  <div class="breeze" aria-hidden="true"></div>
+
+  <!-- Light spines: brief glowing connections between pulsing wishes -->
+  <div class="spines" aria-hidden="true"></div>
+
+  <!-- Creatures of light: larger glowing beings on slow orbits -->
+  <div class="creatures" aria-hidden="true"></div>
+
+  <!-- Plant CTA, sits below the wishes -->
+  <div class="garden-cta">
+    <button type="button" id="open-plant-secondary" class="btn primary plant-secondary">✦ Plant a wish</button>
+  </div>
+
+  <!-- Ornament frieze — closes the garden and bridges into the about section -->
+  <div class="garden-frieze" aria-hidden="true">
+    <svg viewBox="0 0 800 80" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <pattern id="frieze-arabesque" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
+          <path d="M 40 10 C 60 10 70 30 40 40 C 10 30 20 10 40 10 Z
+                   M 40 70 C 60 70 70 50 40 40 C 10 50 20 70 40 70 Z"
+                fill="none" stroke="#d9a93a" stroke-width="0.6" opacity="0.6"/>
+          <circle cx="40" cy="40" r="2" fill="#f0c75e" opacity="0.8"/>
+          <circle cx="0"  cy="40" r="1" fill="#f0c75e" opacity="0.6"/>
+          <circle cx="80" cy="40" r="1" fill="#f0c75e" opacity="0.6"/>
+        </pattern>
+      </defs>
+      <rect x="0" y="0" width="800" height="80" fill="url(#frieze-arabesque)"/>
+      <line x1="0" y1="2"  x2="800" y2="2"  stroke="#d9a93a" stroke-width="0.5" opacity="0.45"/>
+      <line x1="0" y1="78" x2="800" y2="78" stroke="#d9a93a" stroke-width="0.5" opacity="0.45"/>
+    </svg>
+    <div class="frieze-medallion">
+      <span>❉</span><span>✦</span><span>❀</span><span>✦</span><span>❉</span>
+    </div>
   </div>
 </section>
 

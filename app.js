@@ -424,7 +424,7 @@ function fireBurialAnimation(sourceEl, hue) {
 // ─── The garden ─────────────────────────────────────────────────────
 
 const gardenList  = document.getElementById("garden-list");
-const gardenCount = document.getElementById("garden-count");
+const gardenCount = null;
 
 async function loadGarden() {
   if (!CFG.APPS_SCRIPT_URL || CFG.APPS_SCRIPT_URL.includes("REPLACE_DEPLOYMENT_ID")) {
@@ -438,6 +438,10 @@ async function loadGarden() {
     const res = await fetch(CFG.APPS_SCRIPT_URL + "?_=" + Date.now());
     const json = await res.json();
     rows = (json.rows || []).filter(r => r.label && r.ct);
+    // Hide a small set of legacy test rows from the view until the gardener
+    // gets around to running cleanup() in the Apps Script editor.
+    const HIDE = new Set(["setup-test", "ffffff", "kandil"]);
+    rows = rows.filter(r => !HIDE.has(r.label) && !r.label.startsWith("node-roundtrip-") && !r.label.startsWith("test-"));
   } catch (err) {
     gardenList.innerHTML = `<p class="loading">could not read the garden: ${err.message}</p>`;
     return;
@@ -467,6 +471,10 @@ async function loadGarden() {
     card.className = "wish-bundle" + (fulfilled ? " fulfilled" : "");
     card.type = "button";
     card.style.setProperty("--hue", String(hue));
+    // Each wish gets its own breathing rhythm so the garden never pulses in lockstep.
+    card.style.setProperty("--pulse-dur",   (3.5 + Math.random() * 4).toFixed(2) + "s");
+    card.style.setProperty("--breathe-dur", (4.5 + Math.random() * 4).toFixed(2) + "s");
+    card.style.setProperty("--pulse-delay", (Math.random() * 4).toFixed(2) + "s");
     card.innerHTML = `
       <div class="medallion-wrap">
         ${sparkleStars(fulfilled ? 6 : 3)}
@@ -704,8 +712,192 @@ document.addEventListener("click", () => {
   });
 });
 
+// ════════════════════════════════════════════════════════════════
+// Garden breeze — pulsing wishes emit fireflies that drift away
+// ════════════════════════════════════════════════════════════════
+
+function startGardenBreeze() {
+  const breeze = document.querySelector(".breeze");
+  const spines = document.querySelector(".spines");
+  if (!breeze) return;
+  const tick = () => {
+    const bundles = document.querySelectorAll(".wish-bundle");
+    if (bundles.length) {
+      const n = Math.random() < 0.35 ? 2 : 1;
+      for (let i = 0; i < n; i++) {
+        const target = bundles[Math.floor(Math.random() * bundles.length)];
+        emitWishFirefly(target, breeze);
+      }
+      // every few ticks, draw a brief spine of light between two nearby wishes
+      if (spines && bundles.length >= 2 && Math.random() < 0.45) {
+        flickerSpine(spines, bundles);
+      }
+    }
+    setTimeout(tick, 500 + Math.random() * 900);
+  };
+  setTimeout(tick, 1500);
+}
+
+function flickerSpine(layer, bundles) {
+  const a = bundles[Math.floor(Math.random() * bundles.length)];
+  let b = bundles[Math.floor(Math.random() * bundles.length)];
+  if (b === a) {
+    b = bundles[(Array.from(bundles).indexOf(a) + 1) % bundles.length];
+  }
+  const aw = a.querySelector(".medallion-wrap");
+  const bw = b.querySelector(".medallion-wrap");
+  if (!aw || !bw) return;
+  const ar = aw.getBoundingClientRect();
+  const br = bw.getBoundingClientRect();
+  const lr = layer.getBoundingClientRect();
+  const x1 = ar.left + ar.width  / 2 - lr.left;
+  const y1 = ar.top  + ar.height / 2 - lr.top;
+  const x2 = br.left + br.width  / 2 - lr.left;
+  const y2 = br.top  + br.height / 2 - lr.top;
+  const dx = x2 - x1, dy = y2 - y1;
+  const len = Math.sqrt(dx * dx + dy * dy);
+  // Skip if the two wishes are too far apart visually — keeps the network legible.
+  if (len < 50 || len > 480) return;
+  const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+  const hueA = a.style.getPropertyValue("--hue") || "40";
+  const hueB = b.style.getPropertyValue("--hue") || "40";
+  const spine = document.createElement("div");
+  spine.className = "spine";
+  spine.style.left = x1 + "px";
+  spine.style.top  = y1 + "px";
+  spine.style.width = len + "px";
+  spine.style.transform = `rotate(${angle}deg)`;
+  spine.style.background =
+    `linear-gradient(90deg,
+        hsla(${hueA},78%,72%,0) 0%,
+        hsla(${hueA},80%,80%,0.85) 18%,
+        hsla(${(parseInt(hueA)+parseInt(hueB))/2},80%,85%,1) 50%,
+        hsla(${hueB},80%,80%,0.85) 82%,
+        hsla(${hueB},78%,72%,0) 100%)`;
+  spine.style.boxShadow =
+    `0 0 8px hsl(${hueA},75%,72%), 0 0 18px hsla(${hueB},65%,60%,0.5)`;
+  layer.appendChild(spine);
+  setTimeout(() => spine.remove(), 2700);
+}
+
+function emitWishFirefly(bundleEl, breezeLayer) {
+  const wrap = bundleEl.querySelector(".medallion-wrap");
+  if (!wrap) return;
+  const wRect = wrap.getBoundingClientRect();
+  const bRect = breezeLayer.getBoundingClientRect();
+  const x = (wRect.left - bRect.left) + wRect.width / 2;
+  const y = (wRect.top  - bRect.top)  + wRect.height / 2;
+  // skip if the wish is far offscreen (saves DOM churn while user is far away)
+  if (y < -200 || y > bRect.height + 200) return;
+
+  const hue = bundleEl.style.getPropertyValue("--hue") || "40";
+  const fulfilled = bundleEl.classList.contains("fulfilled");
+  const orb = document.createElement("span");
+  orb.className = "wish-firefly";
+  orb.style.left = x + "px";
+  orb.style.top  = y + "px";
+
+  const angle = Math.random() * Math.PI * 2;
+  const dist  = 60 + Math.random() * 240;
+  orb.style.setProperty("--ox", (Math.cos(angle) * dist).toFixed(0) + "px");
+  orb.style.setProperty("--oy", (Math.sin(angle) * dist).toFixed(0) + "px");
+  orb.style.setProperty("--dur", (3 + Math.random() * 3).toFixed(2) + "s");
+
+  const c = fulfilled ? "#fff5d4" : `hsl(${hue},78%,75%)`;
+  orb.style.background = c;
+  orb.style.boxShadow =
+    `0 0 8px ${c}, 0 0 18px hsl(${hue},65%,60%), 0 0 36px hsla(${hue},60%,55%,0.55)`;
+  const sz = (2 + Math.random() * 2.5).toFixed(1) + "px";
+  orb.style.width = sz; orb.style.height = sz;
+
+  breezeLayer.appendChild(orb);
+  setTimeout(() => orb.remove(), 7000);
+}
+
+// ════════════════════════════════════════════════════════════════
+// Soil cracks — light bleeds through the underground tile pattern
+// ════════════════════════════════════════════════════════════════
+
+function startSoilCracks() {
+  const layer = document.querySelector(".soil-cracks");
+  if (!layer) return;
+  const palette = ["#f0c75e", "#f4a8b5", "#4ec9c9", "#fff5d4", "#f0c75e"];
+  const tick = () => {
+    const horizontal = Math.random() < 0.5;
+    const len = 30 + Math.random() * 90;
+    const c = palette[Math.floor(Math.random() * palette.length)];
+    const crack = document.createElement("span");
+    crack.className = "crack";
+    if (horizontal) {
+      crack.style.width  = len + "px";
+      crack.style.height = "2px";
+      crack.style.background = `linear-gradient(90deg, transparent, ${c} 50%, transparent)`;
+    } else {
+      crack.style.width  = "2px";
+      crack.style.height = len + "px";
+      crack.style.background = `linear-gradient(180deg, transparent, ${c} 50%, transparent)`;
+    }
+    crack.style.boxShadow = `0 0 14px ${c}, 0 0 28px ${c}90`;
+    crack.style.left = Math.random() * 100 + "%";
+    crack.style.top  = Math.random() * 100 + "%";
+    crack.style.animationDuration = (1.6 + Math.random() * 2.4).toFixed(2) + "s";
+    layer.appendChild(crack);
+    setTimeout(() => crack.remove(), 4500);
+    // sometimes a small starburst at the same spot for emphasis
+    if (Math.random() < 0.25) {
+      const star = document.createElement("span");
+      star.className = "crack-star";
+      star.style.left = crack.style.left;
+      star.style.top  = crack.style.top;
+      star.style.color = c;
+      layer.appendChild(star);
+      setTimeout(() => star.remove(), 2200);
+    }
+    setTimeout(tick, 600 + Math.random() * 1700);
+  };
+  setTimeout(tick, 600);
+}
+
+// ════════════════════════════════════════════════════════════════
+// Creatures of light — slow lantern-like beings on long orbits
+// ════════════════════════════════════════════════════════════════
+
+function spawnCreatures() {
+  const layer = document.querySelector(".creatures");
+  if (!layer) return;
+  const palette = [
+    { c: "#f0c75e", glow: "rgba(240,199,94,0.7)" },
+    { c: "#f4a8b5", glow: "rgba(244,168,181,0.7)" },
+    { c: "#4ec9c9", glow: "rgba(78,201,201,0.7)" },
+    { c: "#fff5d4", glow: "rgba(255,245,212,0.7)" },
+  ];
+  const N = window.innerWidth < 600 ? 3 : 5;
+  for (let i = 0; i < N; i++) {
+    const { c, glow } = palette[i % palette.length];
+    const creature = document.createElement("span");
+    creature.className = "creature";
+    // each creature has its own long, looping CSS-keyframed path
+    const dur = (28 + Math.random() * 32).toFixed(0) + "s";
+    creature.style.animationDuration = dur;
+    creature.style.animationDelay = (-Math.random() * 30).toFixed(1) + "s";
+    creature.style.setProperty("--c-color", c);
+    creature.style.setProperty("--c-glow",  glow);
+    // randomized starting region so they don't cluster
+    creature.style.setProperty("--c-base-x", (10 + Math.random() * 80).toFixed(0) + "%");
+    creature.style.setProperty("--c-base-y", (15 + Math.random() * 70).toFixed(0) + "%");
+    // each creature gets a different of 3 motion patterns
+    const variants = ["creature-orbit-a", "creature-orbit-b", "creature-orbit-c"];
+    creature.style.animationName = variants[i % variants.length];
+    layer.appendChild(creature);
+  }
+}
+
 // ─── Footer link & boot ────────────────────────────────────────────
 const repoLink = document.getElementById("repo-link");
 if (repoLink && CFG.REPO_URL) repoLink.href = CFG.REPO_URL;
 
-loadGarden();
+loadGarden().then(() => {
+  startGardenBreeze();
+});
+startSoilCracks();
+spawnCreatures();

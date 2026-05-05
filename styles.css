@@ -527,8 +527,8 @@ input:focus, textarea:focus {
 .underground {
   position: relative;
   background: linear-gradient(180deg,
-    var(--soil-2) 0%, var(--soil-1) 60%, #020310 100%);
-  padding: 2rem 1.2rem 6rem;
+    var(--soil-2) 0%, var(--soil-1) 60%, #04051c 100%);
+  padding: 2rem 1.2rem 0;
   z-index: 1;
   min-height: 60vh;
 }
@@ -668,18 +668,18 @@ input:focus, textarea:focus {
   opacity: 0.7;
   transition: opacity 0.3s ease;
   pointer-events: none;
-  animation: medallion-breathe 5s ease-in-out infinite;
+  animation: medallion-breathe var(--breathe-dur, 5s) ease-in-out var(--pulse-delay, 0s) infinite;
 }
 @keyframes medallion-breathe {
   0%, 100% { transform: scale(1);    opacity: 0.55; }
-  50%      { transform: scale(1.08); opacity: 0.85; }
+  50%      { transform: scale(1.10); opacity: 0.95; }
 }
 .medallion-svg { width: 100%; height: 100%; display: block; position: relative; z-index: 1; }
 .medallion-core { transition: transform 0.3s ease; transform-origin: center; }
-.medallion-svg .core-pulse { animation: medallion-pulse 4s ease-in-out infinite; transform-origin: center; }
+.medallion-svg .core-pulse { animation: medallion-pulse var(--pulse-dur, 4s) ease-in-out var(--pulse-delay, 0s) infinite; transform-origin: center; }
 @keyframes medallion-pulse {
   0%, 100% { opacity: 0.85; transform: scale(1);    }
-  50%      { opacity: 1;    transform: scale(1.06); }
+  50%      { opacity: 1;    transform: scale(1.10); }
 }
 
 .bundle-label {
@@ -753,16 +753,205 @@ input:focus, textarea:focus {
   margin-top: 0.15rem;
 }
 
+/* ─── Breeze layer (fireflies emitted by pulsing wishes) ─── */
+.breeze {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  overflow: hidden;
+}
+.wish-firefly {
+  position: absolute;
+  width: 3px; height: 3px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: var(--gold-1);
+  animation: wish-firefly-fly var(--dur, 4s) ease-out forwards;
+  filter: blur(0.2px);
+  margin: -1.5px 0 0 -1.5px;
+}
+@keyframes wish-firefly-fly {
+  0%   { opacity: 0;    transform: translate(0, 0)                                     scale(0.4); }
+  10%  { opacity: 1;    transform: translate(calc(var(--ox) * 0.05), calc(var(--oy) * 0.05)) scale(1.4); }
+  35%  { opacity: 0.95; transform: translate(calc(var(--ox) * 0.35), calc(var(--oy) * 0.35)) scale(1.1); }
+  70%  { opacity: 0.7;  transform: translate(calc(var(--ox) * 0.7),  calc(var(--oy) * 0.75)) scale(0.9); }
+  100% { opacity: 0;    transform: translate(var(--ox), var(--oy))                          scale(0.3); }
+}
+
+/* ─── Soil cracks (light bleeding through tile pattern) ─── */
+.soil-cracks { position: absolute; inset: 0; pointer-events: none; }
+.crack {
+  position: absolute;
+  opacity: 0;
+  filter: blur(0.5px);
+  animation: crack-light 2.4s ease-in-out forwards;
+  border-radius: 2px;
+}
+@keyframes crack-light {
+  0%   { opacity: 0;    transform: scale(0.6); }
+  35%  { opacity: 0.95; transform: scale(1.1); }
+  70%  { opacity: 0.7;  transform: scale(1);   }
+  100% { opacity: 0;    transform: scale(0.8); }
+}
+.crack-star {
+  position: absolute;
+  width: 0; height: 0;
+  font-size: 0;
+  animation: crack-star-burst 2s ease-out forwards;
+}
+.crack-star::before {
+  content: "✦";
+  position: absolute;
+  font-size: 14px;
+  left: -7px; top: -10px;
+  text-shadow: 0 0 12px currentColor, 0 0 24px currentColor;
+}
+@keyframes crack-star-burst {
+  0%   { opacity: 0; transform: scale(0.2) rotate(0deg);   }
+  40%  { opacity: 1; transform: scale(1.4) rotate(120deg); }
+  100% { opacity: 0; transform: scale(0.3) rotate(220deg); }
+}
+
+/* ─── Light spines between pulsing wishes ─── */
+.spines { position: absolute; inset: 0; pointer-events: none; z-index: 2; overflow: hidden; }
+.spine {
+  position: absolute;
+  height: 1.5px;
+  transform-origin: 0 50%;
+  pointer-events: none;
+  filter: blur(0.5px);
+  animation: spine-flicker 2.5s ease-in-out forwards;
+  opacity: 0;
+  border-radius: 2px;
+}
+@keyframes spine-flicker {
+  0%   { opacity: 0;     transform-origin: 0 50%; }
+  20%  { opacity: 0.85; }
+  60%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ─── Creatures of light — slow lantern-orb beings ─── */
+.creatures {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+  overflow: hidden;
+}
+.creature {
+  position: absolute;
+  width: 10px; height: 10px;
+  left: var(--c-base-x, 50%);
+  top:  var(--c-base-y, 50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--c-color, #f0c75e) 0%, transparent 75%);
+  box-shadow:
+    0 0 14px var(--c-color, #f0c75e),
+    0 0 32px var(--c-glow, rgba(240, 199, 94, 0.7)),
+    0 0 60px var(--c-glow, rgba(240, 199, 94, 0.5));
+  animation: creature-orbit-a 35s ease-in-out infinite;
+  filter: blur(0.3px);
+}
+.creature::after {
+  /* trailing aura */
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--c-glow, rgba(240, 199, 94, 0.4)) 0%, transparent 70%);
+  animation: creature-aura 3s ease-in-out infinite;
+}
+@keyframes creature-aura {
+  0%, 100% { opacity: 0.5; transform: scale(1);   }
+  50%      { opacity: 1;   transform: scale(1.5); }
+}
+@keyframes creature-orbit-a {
+  0%   { transform: translate(0, 0); }
+  20%  { transform: translate(180px, -60px); }
+  35%  { transform: translate(280px, -160px); }
+  50%  { transform: translate(120px, -240px); }
+  65%  { transform: translate(-140px, -180px); }
+  80%  { transform: translate(-220px, -40px); }
+  100% { transform: translate(0, 0); }
+}
+@keyframes creature-orbit-b {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(-200px, 120px); }
+  45%  { transform: translate(-320px, -50px); }
+  60%  { transform: translate(-180px, -200px); }
+  80%  { transform: translate(60px, -100px); }
+  100% { transform: translate(0, 0); }
+}
+@keyframes creature-orbit-c {
+  0%   { transform: translate(0, 0); }
+  15%  { transform: translate(140px, 100px); }
+  30%  { transform: translate(40px, 220px); }
+  50%  { transform: translate(-160px, 180px); }
+  70%  { transform: translate(-200px, -20px); }
+  85%  { transform: translate(-80px, -120px); }
+  100% { transform: translate(0, 0); }
+}
+
+/* ─── Plant CTA (now below the wishes) ─── */
+.garden-cta {
+  position: relative;
+  z-index: 5;
+  text-align: center;
+  margin: 3rem auto 1rem;
+  padding: 0 1rem;
+}
+
+/* ─── Garden frieze — bridges into the about section ─── */
+.garden-frieze {
+  position: relative;
+  z-index: 5;
+  margin-top: 3rem;
+  padding-bottom: 1.5rem;
+}
+.garden-frieze svg {
+  display: block;
+  width: 100%;
+  height: 60px;
+  opacity: 0.55;
+}
+.frieze-medallion {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.4rem 1.5rem;
+  background:
+    radial-gradient(ellipse at center, #07041a 0%, #07041a 60%, transparent 100%);
+  color: var(--gold-1);
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  text-shadow: 0 0 10px rgba(240, 199, 94, 0.5);
+}
+.frieze-medallion span:nth-child(2),
+.frieze-medallion span:nth-child(4) {
+  font-size: 0.75rem;
+  color: var(--gold-2);
+}
+.frieze-medallion span:nth-child(3) {
+  color: var(--rose-1);
+  font-size: 1.4rem;
+  text-shadow: 0 0 14px rgba(244, 168, 181, 0.6);
+}
+
 /* ════════════════════════════════════════════════════════════════
    ABOUT — magical scene (more lights, ornaments, glow)
    ════════════════════════════════════════════════════════════════ */
 .about-magic {
   position: relative;
-  padding: 5rem 1.5rem 6rem;
+  padding: 4rem 1.5rem 5rem;
   overflow: hidden;
   background:
     radial-gradient(ellipse at 50% 50%, rgba(110, 31, 44, 0.18) 0%, transparent 70%),
-    linear-gradient(180deg, #030411 0%, #050a1f 50%, #030411 100%);
+    linear-gradient(180deg, #04051c 0%, #050a1f 40%, #030411 100%);
 }
 .about-bg { position: absolute; inset: 0; pointer-events: none; }
 .about-glow {
