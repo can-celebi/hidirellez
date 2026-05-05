@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hıdırellez — A Garden of Wishes</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- ─── SKY (fixed background) ─── -->
+<div class="sky-bg" aria-hidden="true">
+  <div class="grid"></div>
+  <div class="moon"></div>
+  <div class="stars"></div>
+  <div class="petals"></div>
+</div>
+
+<!-- ─── Reusable info-icon SVG (oriental medallion-style) ─── -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="info-icon-symbol" viewBox="0 0 24 24">
+      <!-- 8-pointed Selçuk star with question -->
+      <path d="M12,2 L14.5,9.5 L22,12 L14.5,14.5 L12,22 L9.5,14.5 L2,12 L9.5,9.5 Z"
+            fill="none" stroke="currentColor" stroke-width="0.7" opacity="0.5"/>
+      <path d="M12,2 L14.5,9.5 L22,12 L14.5,14.5 L12,22 L9.5,14.5 L2,12 L9.5,9.5 Z"
+            fill="none" stroke="currentColor" stroke-width="0.6" opacity="0.7"
+            transform="rotate(22.5 12 12)"/>
+      <circle cx="12" cy="12" r="6" fill="none" stroke="currentColor"
+              stroke-width="0.5" stroke-dasharray="1.5 2"/>
+      <text x="12" y="15.5" text-anchor="middle"
+            font-family="Cormorant Garamond, serif"
+            font-style="italic" font-size="9" font-weight="500"
+            fill="currentColor">?</text>
+    </symbol>
+  </defs>
+</svg>
+
+<header class="hero">
+  <p class="overline">May 5 · 6 — the night Hızır and İlyas meet</p>
+  <h1>Hıdırellez</h1>
+  <p class="subtitle">
+    A digital rose tree, for wishes you can plant from anywhere.
+    <button type="button" class="info-btn" data-info-target="info-hero" aria-label="What is this?">
+      <svg class="info-icon-svg"><use href="#info-icon-symbol"/></svg>
+    </button>
+  </p>
+  <div class="info-popover" id="info-hero" role="tooltip" hidden>
+    <p>Write a wish. Lock it with a password only you know. Bury it at the roots below. When it comes true, dig it up — and reveal it to the garden if you like.</p>
+  </div>
+
+  <div class="scroll-cue" aria-hidden="true">
+    <span class="scroll-cue-line"></span>
+    <span class="scroll-cue-mark">❀</span>
+  </div>
+</header>
+
+<!-- ─── TREE SECTION ─── -->
+<section class="tree-section" aria-label="The rose tree">
+  <div class="tree-fireflies" aria-hidden="true"></div>
+
+  <svg class="rose-tree" viewBox="0 0 800 900" preserveAspectRatio="xMidYEnd meet" aria-hidden="true">
+    <defs>
+      <radialGradient id="rose-glow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%"  stop-color="#fff0ec" stop-opacity="0.95"/>
+        <stop offset="35%" stop-color="#f4a8b5" stop-opacity="0.75"/>
+        <stop offset="100%" stop-color="#d97a8a" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="rose-petal-shade" cx="50%" cy="40%" r="60%">
+        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.25"/>
+        <stop offset="60%" stop-color="#ffffff" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="trunk-grad" x1="50%" y1="100%" x2="50%" y2="0%">
+        <stop offset="0%"  stop-color="#7a5a3a"/>
+        <stop offset="60%" stop-color="#c9a87a"/>
+        <stop offset="100%" stop-color="#e9d8a8"/>
+      </linearGradient>
+      <filter id="line-glow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="2.5" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+
+      <!-- ─── Rose symbol — overlapping round petals (Iznik rose disk) ─── -->
+      <symbol id="rose-symbol" overflow="visible">
+        <!-- glowing halo -->
+        <circle r="14" fill="url(#rose-glow)" opacity="0.9"/>
+
+        <!-- 8 outer round petals (overlapping circles → rose-disk silhouette) -->
+        <g class="rose-petals-outer" fill="#6e1f2c">
+          <circle cx="0"    cy="-6"   r="4.7"/>
+          <circle cx="4.24" cy="-4.24" r="4.7"/>
+          <circle cx="6"    cy="0"    r="4.7"/>
+          <circle cx="4.24" cy="4.24" r="4.7"/>
+          <circle cx="0"    cy="6"    r="4.7"/>
+          <circle cx="-4.24" cy="4.24" r="4.7"/>
+          <circle cx="-6"   cy="0"    r="4.7"/>
+          <circle cx="-4.24" cy="-4.24" r="4.7"/>
+        </g>
+
+        <!-- 8 middle petals (smaller, brighter, rotated 22.5°) -->
+        <g class="rose-petals-mid" fill="#c24658" transform="rotate(22.5)">
+          <circle cx="0"    cy="-4"   r="3.1"/>
+          <circle cx="2.83" cy="-2.83" r="3.1"/>
+          <circle cx="4"    cy="0"    r="3.1"/>
+          <circle cx="2.83" cy="2.83" r="3.1"/>
+          <circle cx="0"    cy="4"    r="3.1"/>
+          <circle cx="-2.83" cy="2.83" r="3.1"/>
+          <circle cx="-4"   cy="0"    r="3.1"/>
+          <circle cx="-2.83" cy="-2.83" r="3.1"/>
+        </g>
+
+        <!-- inner coral disk -->
+        <circle r="2.8" fill="#f4a8b5"/>
+
+        <!-- top-light highlight (gives the rose a sense of being lit from above) -->
+        <circle r="5.5" fill="url(#rose-petal-shade)" opacity="0.55"/>
+
+        <!-- pulsing cream center -->
+        <circle r="1.1" fill="#f4ead4" class="rose-core"/>
+      </symbol>
+    </defs>
+
+    <path class="trunk"
+      d="M400,900
+         C 392,820 412,740 400,660
+         C 388,600 415,540 400,470
+         C 388,420 408,380 400,340"
+      stroke="url(#trunk-grad)" stroke-width="16" fill="none"
+      stroke-linecap="round" filter="url(#line-glow)"/>
+
+    <g class="branches" stroke="url(#trunk-grad)" fill="none"
+       stroke-linecap="round" filter="url(#line-glow)">
+      <path d="M400,640 Q 280,580 180,540 Q 110,520 70,470" stroke-width="9"/>
+      <path d="M180,540 Q 130,500 90,440" stroke-width="5"/>
+      <path d="M280,580 Q 250,540 230,480" stroke-width="5"/>
+      <path d="M400,640 Q 520,580 620,540 Q 690,520 730,470" stroke-width="9"/>
+      <path d="M620,540 Q 670,500 710,440" stroke-width="5"/>
+      <path d="M520,580 Q 550,540 570,480" stroke-width="5"/>
+      <path d="M400,520 Q 320,460 250,400 Q 200,360 170,300" stroke-width="8"/>
+      <path d="M250,400 Q 220,360 200,310" stroke-width="4"/>
+      <path d="M320,460 Q 300,420 290,370" stroke-width="4"/>
+      <path d="M400,520 Q 480,460 550,400 Q 600,360 630,300" stroke-width="8"/>
+      <path d="M550,400 Q 580,360 600,310" stroke-width="4"/>
+      <path d="M480,460 Q 500,420 510,370" stroke-width="4"/>
+      <path d="M400,420 Q 395,360 400,300 Q 395,250 400,200" stroke-width="8"/>
+      <path d="M400,360 Q 350,290 320,230 Q 300,190 290,140" stroke-width="6"/>
+      <path d="M350,290 Q 330,250 320,200" stroke-width="3"/>
+      <path d="M400,360 Q 450,290 480,230 Q 500,190 510,140" stroke-width="6"/>
+      <path d="M450,290 Q 470,250 480,200" stroke-width="3"/>
+      <path d="M400,260 Q 380,200 360,140" stroke-width="4"/>
+      <path d="M400,260 Q 420,200 440,140" stroke-width="4"/>
+      <path d="M400,200 Q 400,150 400,100" stroke-width="3"/>
+    </g>
+
+    <g class="leaves" fill="#5a8a8a" opacity="0.85"></g>
+
+    <g class="roses" filter="url(#line-glow)"></g>
+
+    <g class="roots" stroke="url(#trunk-grad)" fill="none"
+       stroke-linecap="round" opacity="0.55" filter="url(#line-glow)">
+      <path d="M400,900 Q 380,1000 320,1100" stroke-width="6"/>
+      <path d="M400,900 Q 420,1000 480,1100" stroke-width="6"/>
+      <path d="M400,900 Q 360,980 250,1080" stroke-width="4"/>
+      <path d="M400,900 Q 440,980 550,1080" stroke-width="4"/>
+      <path d="M400,900 Q 400,980 400,1100" stroke-width="3"/>
+    </g>
+  </svg>
+</section>
+
+<!-- ─── SURFACE LINE ─── -->
+<div class="surface" aria-hidden="true">
+  <div class="surface-line"></div>
+  <div class="surface-glow"></div>
+</div>
+
+<!-- ─── UNDERGROUND ─── -->
+<section id="garden" class="underground">
+  <div class="underground-bg" aria-hidden="true">
+    <div class="soil-grid"></div>
+    <div class="soil-particles"></div>
+    <div class="soil-fireflies"></div>
+  </div>
+
+  <div class="underground-header">
+    <h2>The garden
+      <button type="button" class="info-btn info-btn-h2" data-info-target="info-garden" aria-label="How does this work?">
+        <svg class="info-icon-svg"><use href="#info-icon-symbol"/></svg>
+      </button>
+    </h2>
+    <div class="info-popover" id="info-garden" role="tooltip" hidden>
+      <p>Each glow is a buried wish. Tap one and try a password — if it's yours, it opens. A wish that came true wears a halo of gold.</p>
+    </div>
+    <p class="count" id="garden-count"></p>
+    <button type="button" id="open-plant-secondary" class="btn primary plant-secondary">✦ Plant a wish</button>
+  </div>
+
+  <div id="garden-list" class="garden-list" aria-live="polite">
+    <p class="loading">listening to the soil…</p>
+  </div>
+</section>
+
+<!-- ─── ABOUT — magical scene ─── -->
+<section id="about" class="about-magic">
+  <div class="about-bg" aria-hidden="true">
+    <div class="about-fireflies"></div>
+    <div class="about-glow"></div>
+  </div>
+
+  <div class="about-inner">
+    <div class="about-ornament" aria-hidden="true">
+      <span>❉</span><span>✦</span><span>❀</span><span>✦</span><span>❉</span>
+    </div>
+
+    <h2>About this rose tree</h2>
+
+    <p>
+      Hıdırellez (<em>Hıdır</em> + <em>Ellez</em> — the prophets Hızır and İlyas) is celebrated across Türkiye,
+      the Balkans, the Caucasus and Central Asia on the night of May 5th into May 6th, when winter
+      and summer are said to meet.
+    </p>
+    <p>
+      One old custom: write your wish on a slip of paper and bury it at the roots of a rose tree,
+      or tie it to a branch, or set it afloat on running water. When the wish comes true,
+      you go back and dig it up.
+    </p>
+    <p>
+      Here, your wish is sealed in your browser with a password only you know — even the gardener
+      can't read it. When it comes true, you can quietly dig it up alone, or reveal it to the garden
+      so others can read what was once just a wish.
+    </p>
+
+    <div class="about-ornament" aria-hidden="true">
+      <span>❉</span><span>✦</span><span>❀</span><span>✦</span><span>❉</span>
+    </div>
+
+    <p class="cred">
+      Built for friends, in the spirit of the rose tree. Source on
+      <a id="repo-link" href="#">GitHub</a>.
+    </p>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     PLANT-A-WISH MODAL
+     ════════════════════════════════════════════════════════════════ -->
+<div id="plant-modal" class="modal modal-magic hidden" role="dialog" aria-labelledby="plant-title" aria-modal="true">
+  <div class="modal-petals" aria-hidden="true"></div>
+  <div class="modal-card plant-modal-card">
+    <button class="modal-close" data-close-plant aria-label="Close">×</button>
+
+    <svg class="filigree filigree-tl" viewBox="0 0 60 60" aria-hidden="true">
+      <path d="M2,30 Q 2,2 30,2 M2,18 L 18,18 L 18,2 M8,8 Q 18,8 18,18"
+            stroke="#f0c75e" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+      <circle cx="18" cy="18" r="1.5" fill="#f0c75e"/>
+    </svg>
+    <svg class="filigree filigree-tr" viewBox="0 0 60 60" aria-hidden="true">
+      <path d="M58,30 Q 58,2 30,2 M58,18 L 42,18 L 42,2 M52,8 Q 42,8 42,18"
+            stroke="#f0c75e" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+      <circle cx="42" cy="18" r="1.5" fill="#f0c75e"/>
+    </svg>
+    <svg class="filigree filigree-bl" viewBox="0 0 60 60" aria-hidden="true">
+      <path d="M2,30 Q 2,58 30,58 M2,42 L 18,42 L 18,58 M8,52 Q 18,52 18,42"
+            stroke="#f0c75e" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+      <circle cx="18" cy="42" r="1.5" fill="#f0c75e"/>
+    </svg>
+    <svg class="filigree filigree-br" viewBox="0 0 60 60" aria-hidden="true">
+      <path d="M58,30 Q 58,58 30,58 M58,42 L 42,42 L 42,58 M52,52 Q 42,52 42,42"
+            stroke="#f0c75e" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+      <circle cx="42" cy="42" r="1.5" fill="#f0c75e"/>
+    </svg>
+
+    <h3 id="plant-title" class="plant-title">Plant a wish</h3>
+    <p class="plant-sub">✦ ❀ ✦</p>
+    <p class="hint">
+      Sealed in your browser before anything leaves the page. Only your password can open it again — there is no recovery.
+    </p>
+
+    <form id="plant-form" autocomplete="off">
+      <label>
+        <span>Your wish</span>
+        <textarea id="wish" rows="4" maxlength="2000" required
+          placeholder="Whatever your heart wants — keep it private or set it free."></textarea>
+      </label>
+
+      <label>
+        <span>A marker stone <em>(a name only you'll recognize)</em></span>
+        <input id="label" type="text" maxlength="60" required
+          placeholder="e.g. blue thistle, the one about Tokyo, sapphire" />
+      </label>
+
+      <div class="row">
+        <label>
+          <span>Password</span>
+          <input id="password" type="password" minlength="4" required
+            placeholder="A secret only you know" />
+        </label>
+        <label>
+          <span>Confirm</span>
+          <input id="password2" type="password" minlength="4" required placeholder="Repeat" />
+        </label>
+      </div>
+
+      <button type="submit" class="btn primary big">Bury it under the rose tree</button>
+      <p id="plant-status" class="status" role="status"></p>
+    </form>
+  </div>
+</div>
+
+<!-- ─── DIG-UP MODAL ─── -->
+<div id="dig-modal" class="modal hidden" role="dialog" aria-labelledby="dig-title" aria-modal="true">
+  <div class="modal-card">
+    <button class="modal-close" id="modal-close" aria-label="Close">×</button>
+    <h3 id="dig-title">Digging up <span id="dig-label"></span></h3>
+    <div id="dig-body">
+      <p class="hint">Enter the password the wisher chose.</p>
+      <form id="dig-form">
+        <input id="dig-password" type="password" placeholder="Password" autocomplete="off" required />
+        <button type="submit" class="btn primary">Open</button>
+      </form>
+    </div>
+    <div id="dig-result" class="dig-result"></div>
+  </div>
+</div>
+
+<div id="burial-overlay" aria-hidden="true"></div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
