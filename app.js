@@ -210,11 +210,15 @@ const GOLDEN_ANGLE_DEG = 137.5077640500378;
       path.setAttribute("d",
         `M${cx.toFixed(1)},${cy.toFixed(1)} Q ${cxc.toFixed(1)},${cyc.toFixed(1)} ${x2.toFixed(1)},${y2.toFixed(1)}`);
       path.setAttribute("stroke", "url(#trunk-grad)");
-      path.setAttribute("stroke-width", (1.4 + Math.random() * 1.6).toFixed(1));
+      path.setAttribute("stroke-width", (1.6 + Math.random() * 1.6).toFixed(1));
       path.setAttribute("stroke-linecap", "round");
       path.setAttribute("fill", "none");
-      path.setAttribute("opacity", (0.75 + Math.random() * 0.2).toFixed(2));
-      path.style.animationDelay = (1.0 + Math.random() * 1.5).toFixed(2) + "s";
+      // Bypass the dash-draw CSS for twigs — they'd flicker through partial
+      // states with the line-glow blur filter. Use a simple opacity fade-in.
+      path.style.strokeDasharray = "none";
+      path.style.opacity = "0";
+      path.style.setProperty("--twig-final-opacity", (0.75 + Math.random() * 0.2).toFixed(2));
+      path.style.animation = `twig-fade ${(1 + Math.random()*0.6).toFixed(2)}s ease-out ${(1.0 + Math.random() * 1.6).toFixed(2)}s forwards`;
       branchesG.appendChild(path);
 
       // Each twig usually ends in a tiny terminal twiglet (recursive feel)
@@ -226,10 +230,13 @@ const GOLDEN_ANGLE_DEG = 137.5077640500378;
         const tw = document.createElementNS(NS, "path");
         tw.setAttribute("d", `M${x2.toFixed(1)},${y2.toFixed(1)} L ${x3.toFixed(1)},${y3.toFixed(1)}`);
         tw.setAttribute("stroke", "url(#trunk-grad)");
-        tw.setAttribute("stroke-width", "0.9");
+        tw.setAttribute("stroke-width", "1.1");
         tw.setAttribute("stroke-linecap", "round");
         tw.setAttribute("fill", "none");
-        tw.setAttribute("opacity", "0.7");
+        tw.style.strokeDasharray = "none";
+        tw.style.opacity = "0";
+        tw.style.setProperty("--twig-final-opacity", "0.65");
+        tw.style.animation = `twig-fade 0.8s ease-out ${(1.5 + Math.random() * 1.6).toFixed(2)}s forwards`;
         branchesG.appendChild(tw);
       }
     }
@@ -453,7 +460,11 @@ async function loadGarden() {
     return;
   }
 
-  rows.reverse();
+  // Random order — soft shuffle so the garden looks alive each visit.
+  for (let i = rows.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [rows[i], rows[j]] = [rows[j], rows[i]];
+  }
 
   if (gardenCount) {
     const fulfilledN = rows.filter(r => r.revealed_text).length;
@@ -471,10 +482,20 @@ async function loadGarden() {
     card.className = "wish-bundle" + (fulfilled ? " fulfilled" : "");
     card.type = "button";
     card.style.setProperty("--hue", String(hue));
-    // Each wish gets its own breathing rhythm so the garden never pulses in lockstep.
-    card.style.setProperty("--pulse-dur",   (3.5 + Math.random() * 4).toFixed(2) + "s");
-    card.style.setProperty("--breathe-dur", (4.5 + Math.random() * 4).toFixed(2) + "s");
-    card.style.setProperty("--pulse-delay", (Math.random() * 4).toFixed(2) + "s");
+    // Each wish gets its own breathing rhythm + tremble so the garden never pulses in lockstep.
+    card.style.setProperty("--pulse-dur",     (3.5 + Math.random() * 4).toFixed(2) + "s");
+    card.style.setProperty("--breathe-dur",   (4.5 + Math.random() * 4).toFixed(2) + "s");
+    card.style.setProperty("--pulse-delay",   (Math.random() * 4).toFixed(2) + "s");
+    card.style.setProperty("--tremble-dur",   (5 + Math.random() * 6).toFixed(2) + "s");
+    card.style.setProperty("--tremble-delay", (Math.random() * 5).toFixed(2) + "s");
+    // Per-wish translation offsets break the rigid grid so the garden looks
+    // chaotic — alive, scattered like seeds settled into uneven soil.
+    const ox = (Math.random() * 30 - 15).toFixed(0);
+    const oy = (Math.random() * 30 - 15).toFixed(0);
+    const rot = (Math.random() * 8 - 4).toFixed(1);
+    card.style.setProperty("--scatter-x", ox + "px");
+    card.style.setProperty("--scatter-y", oy + "px");
+    card.style.setProperty("--scatter-r", rot + "deg");
     card.innerHTML = `
       <div class="medallion-wrap">
         ${sparkleStars(fulfilled ? 6 : 3)}
@@ -723,19 +744,44 @@ function startGardenBreeze() {
   const tick = () => {
     const bundles = document.querySelectorAll(".wish-bundle");
     if (bundles.length) {
-      const n = Math.random() < 0.35 ? 2 : 1;
+      const n = Math.random() < 0.4 ? 2 : 1;
       for (let i = 0; i < n; i++) {
         const target = bundles[Math.floor(Math.random() * bundles.length)];
         emitWishFirefly(target, breeze);
       }
-      // every few ticks, draw a brief spine of light between two nearby wishes
-      if (spines && bundles.length >= 2 && Math.random() < 0.45) {
-        flickerSpine(spines, bundles);
+      // Spines flicker often — energy connections between wishes in every direction.
+      if (spines && bundles.length >= 2) {
+        if (Math.random() < 0.85) flickerSpine(spines, bundles);
+        if (Math.random() < 0.40) flickerSpine(spines, bundles);  // sometimes a second
+        if (Math.random() < 0.12) flickerSpine(spines, bundles);  // rare third
       }
     }
-    setTimeout(tick, 500 + Math.random() * 900);
+    setTimeout(tick, 320 + Math.random() * 680);
   };
-  setTimeout(tick, 1500);
+  setTimeout(tick, 1200);
+}
+
+// Every minute or so, swap two random wishes in the DOM so the garden
+// reshuffles itself softly. The wishes are alive — they don't stay put.
+function startGardenShuffle() {
+  const tick = () => {
+    const list = document.getElementById("garden-list");
+    if (list) {
+      const cards = Array.from(list.children).filter(c => c.classList.contains("wish-bundle"));
+      if (cards.length >= 2) {
+        const a = Math.floor(Math.random() * cards.length);
+        let b = Math.floor(Math.random() * cards.length);
+        while (b === a) b = Math.floor(Math.random() * cards.length);
+        const aN = cards[a], bN = cards[b];
+        const aNext = aN.nextSibling === bN ? aN : aN.nextSibling;
+        const bNext = bN.nextSibling === aN ? bN : bN.nextSibling;
+        list.insertBefore(aN, bNext);
+        list.insertBefore(bN, aNext);
+      }
+    }
+    setTimeout(tick, 45000 + Math.random() * 45000);  // every 45–90s
+  };
+  setTimeout(tick, 30000);  // first shuffle 30s after load
 }
 
 function flickerSpine(layer, bundles) {
@@ -898,6 +944,7 @@ if (repoLink && CFG.REPO_URL) repoLink.href = CFG.REPO_URL;
 
 loadGarden().then(() => {
   startGardenBreeze();
+  startGardenShuffle();
 });
 startSoilCracks();
 spawnCreatures();

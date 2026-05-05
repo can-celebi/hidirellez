@@ -448,10 +448,20 @@ input:focus, textarea:focus {
 .rose-tree .trunk,
 .rose-tree .branches path {
   stroke-dasharray: 4000;
-  stroke-dashoffset: 4000;
-  animation: draw 3.5s ease-out forwards;
+  /* Base = visible. If the animation never plays (fallback / odd browsers /
+     reduced motion), the branches still render fully. The animation just
+     paints them in from invisible → visible during the first 3.5s. */
+  stroke-dashoffset: 0;
+  animation: draw 3.5s ease-out both;
 }
-@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes draw {
+  from { stroke-dashoffset: 4000; }
+  to   { stroke-dashoffset: 0; }
+}
+@keyframes twig-fade {
+  from { opacity: 0; }
+  to   { opacity: var(--twig-final-opacity, 0.85); }
+}
 
 .rose-tree .leaves path {
   opacity: 0;
@@ -623,6 +633,11 @@ input:focus, textarea:focus {
 
 .wish-bundle {
   --hue: 350;
+  --scatter-x: 0px;
+  --scatter-y: 0px;
+  --scatter-r: 0deg;
+  --tremble-dur: 7s;
+  --tremble-delay: 0s;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -633,9 +648,38 @@ input:focus, textarea:focus {
   cursor: pointer;
   font: inherit;
   position: relative;
-  transition: transform 0.3s ease;
+  /* Each wish settles at a slightly random offset + rotation, then gently
+     trembles forever — alive, not statically placed in a grid. */
+  transform: translate(var(--scatter-x), var(--scatter-y)) rotate(var(--scatter-r));
+  animation: wish-tremble var(--tremble-dur) ease-in-out var(--tremble-delay) infinite;
+  transition: transform 0.6s ease;
 }
-.wish-bundle:hover { transform: translateY(-5px); }
+@keyframes wish-tremble {
+  0%, 100% {
+    transform: translate(var(--scatter-x), var(--scatter-y)) rotate(var(--scatter-r));
+  }
+  20% {
+    transform: translate(calc(var(--scatter-x) + 2px), calc(var(--scatter-y) - 1.5px))
+               rotate(calc(var(--scatter-r) + 0.6deg));
+  }
+  40% {
+    transform: translate(calc(var(--scatter-x) - 1.5px), calc(var(--scatter-y) + 1.5px))
+               rotate(calc(var(--scatter-r) - 0.5deg));
+  }
+  60% {
+    transform: translate(calc(var(--scatter-x) + 1.5px), calc(var(--scatter-y) + 1px))
+               rotate(calc(var(--scatter-r) + 0.4deg));
+  }
+  80% {
+    transform: translate(calc(var(--scatter-x) - 2px), calc(var(--scatter-y) - 1px))
+               rotate(calc(var(--scatter-r) - 0.6deg));
+  }
+}
+.wish-bundle:hover {
+  /* hover overrides the tremble, lifts the wish out of its scatter */
+  animation: none;
+  transform: translate(var(--scatter-x), calc(var(--scatter-y) - 6px)) rotate(0deg) scale(1.04);
+}
 .wish-bundle:hover .medallion-glow { opacity: 1; }
 .wish-bundle:hover .medallion-core { transform: scale(1.1); }
 
