@@ -283,7 +283,7 @@ const GOLDEN_ANGLE_DEG = 137.5077640500378;
 // ════════════════════════════════════════════════════════════════
 
 const plantModal = document.getElementById("plant-modal");
-const openPlantBtns = [document.getElementById("open-plant-secondary")].filter(Boolean);
+const openPlantBtns = [document.getElementById("plant-orb")].filter(Boolean);
 openPlantBtns.forEach(b => b.addEventListener("click", openPlantModal));
 
 document.querySelectorAll("[data-close-plant]").forEach(b =>

@@ -180,11 +180,18 @@
 <!-- ─── UNDERGROUND ─── -->
 <section id="garden" class="underground">
   <div class="underground-bg" aria-hidden="true">
+    <div class="halo-down"></div>
     <div class="soil-grid"></div>
     <div class="soil-particles"></div>
     <div class="soil-cracks"></div>
     <div class="soil-fireflies"></div>
   </div>
+
+  <!-- The trembling light at the entrance of the earth — click to plant a wish -->
+  <button type="button" id="plant-orb" class="plant-orb" aria-label="Plant a wish">
+    <span class="plant-orb-halo"></span>
+    <span class="plant-orb-core"></span>
+  </button>
 
   <div id="garden-list" class="garden-list" aria-live="polite">
     <p class="loading">listening to the soil…</p>
@@ -198,11 +205,6 @@
 
   <!-- Creatures of light: larger glowing beings on slow orbits -->
   <div class="creatures" aria-hidden="true"></div>
-
-  <!-- Plant CTA, sits below the wishes -->
-  <div class="garden-cta">
-    <button type="button" id="open-plant-secondary" class="btn primary plant-secondary">✦ Plant a wish</button>
-  </div>
 
   <!-- Ornament frieze — closes the garden and bridges into the about section -->
   <div class="garden-frieze" aria-hidden="true">
